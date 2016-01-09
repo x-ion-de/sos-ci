@@ -11,7 +11,7 @@ ADMIN_PASSWORD=solidfire
 SERVICE_PASSWORD=solidfire
 SERVICE_TOKEN=111222333444
 
-ENABLED_SERVICES=c-api,c-sch,c-vol,cinder,dstat,g-api,g-reg,horizon,key,mysql,n-api,n-cond,n-cpu,n-crt,n-net,n-obj,n-sch,rabbit,tempest
+ENABLED_SERVICES=c-api,c-sch,c-vol,cinder,dstat,g-api,g-reg,horizon,key,mysql,n-api,n-cond,n-cpu,n-crt,n-net,n-sch,rabbit,tempest
 
 # Screen console logs will capture service logs.
 SYSLOG=False
