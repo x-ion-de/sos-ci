@@ -1,0 +1,42 @@
+- name: provision test instances
+  hosts: localhost
+  vars:
+    instance_name: "{{ NAME|default(test_instance) }}"
+  tasks:
+  - include_vars: ../active_active_vars.yml
+  - name: create instances
+    os_server:
+      state: present
+      auth:
+        username: "{{ os_login }}"
+        password: "{{ os_password }}"
+        project_name: "{{ os_tenant_name }}"
+        auth_url: "{{ auth_url }}"
+      auto_ip: no
+      name: "{{ instance_name }}"
+      image: "{{ image_id }}"
+      flavor: "{{ flavor_id}}"
+      key_name: "{{ key_name }}"
+      volume_size: 50
+      boot_from_volume: True
+      terminate_volume: True
+    register: devstack_instance
+
+  - name: output info
+    debug: var=devstack_instance
+  - name: Add single nic instance to devstack_instances
+    add_host: hostname={{ devstack_instance['openstack']['private_v4'] }} groupname=devstack_instances
+
+  - name: wait for ssh to be ready single nic
+    wait_for:
+      port: 22
+      host: "{{ devstack_instance['openstack']['private_v4'] }}"
+      timeout: 120
+      state: started
+
+  - name: pause for 30 seconds
+    pause: seconds=30
+
+  - name: dump hostname to disk to be used by slave
+    copy: content={{ devstack_instance['openstack']['private_v4'] }} dest={{ result_dir}}/master_ip.txt
+    when: instance_name == "master"
