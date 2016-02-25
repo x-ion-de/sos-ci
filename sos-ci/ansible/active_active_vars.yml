@@ -1,0 +1,12 @@
+os_login: admin
+os_password: solidfire
+os_tenant_name: demo
+auth_url: http://127.0.0.1:5000/v2.0
+
+image_id: b32d450f-1ca7-4e97-a33d-4e7387c6c5c5
+flavor_id: 1337
+key_name: dev
+
+san_ip: 192.168.139.107
+san_login: admin
+san_password: admin

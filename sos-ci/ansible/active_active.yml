@@ -1,0 +1,2 @@
+- include: tasks/active_active_base.yml
+- include: tasks/active_active_configure.yml

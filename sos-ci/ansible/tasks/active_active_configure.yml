@@ -1,0 +1,69 @@
+- name: configure and stack devstack
+  hosts: devstack_instances
+  vars:
+    conf: "{{ CONF|default(localconf.base) }}"
+    instance_name: "{{ NAME|default(test_instance) }}"
+    target_ip: "{{ lookup('file', result_dir + '/master_ip.txt') }}"
+
+  tasks:
+  - include_vars: ../active_active_vars.yml
+
+  - name: dump target_ip
+    debug: "msg={{ target_ip }}"
+
+  - name: dump debug info
+    debug: "msg={{ inventory_hostname }}"
+
+  - name: modify hostname
+    hostname: name=solidfire-ci
+    sudo: yes
+
+  - name: install pkgs
+    sudo: yes
+    apt: pkg={{ item }} state=present update_cache=yes
+    with_items:
+      - git
+      - vim
+
+  - name: clone devstack
+    sudo: no
+    git: repo=https://github.com/openstack-dev/devstack dest=~/devstack
+
+  - name: send over local.conf
+    sudo: no
+    template: src=../../templates/{{ conf }} dest=/home/ubuntu/devstack/local.conf
+
+  - name: set host_ip
+    lineinfile: dest=/home/ubuntu/devstack/local.conf state=present line=HOST_IP={{ inventory_hostname }} regexp=^HOST_IP_LINE
+
+  - name: set service_host for cinder slave
+    lineinfile: dest=/home/ubuntu/devstack/local.conf state=present line=SERVICE_HOST={{ target_ip }} regexp=^SERVICE_HOST_IP_LINE
+    when: conf == "localconf_active_active_minion.base"
+
+    # Configure SolidFire SAN authentication
+  - name: configure SAN IP
+    lineinfile: dest=/home/ubuntu/devstack/local.conf state=present line=san_ip={{ san_ip }} regexp=^SAN_IP_LINE
+
+  - name: configure SAN username
+    lineinfile: dest=/home/ubuntu/devstack/local.conf state=present line=san_login={{ san_login }} regexp=^SAN_LOGIN_LINE
+
+  - name: configure SAN password
+    lineinfile: dest=/home/ubuntu/devstack/local.conf state=present line=san_password={{ san_password }} regexp=^SAN_PASSWORD_LINE
+
+    # Temporarily commented out.
+    #  - name: modify cinder_branch
+    #    lineinfile: dest=/home/ubuntu/devstack/local.conf regexp=^CINDER_BRANCH= line=CINDER_BRANCH={{ patchset_ref }}
+    #    register: git_sha
+
+  - name: run stack.sh
+    sudo: no
+    shell: cd /home/ubuntu/devstack; ./stack.sh 2>&1 > /tmp/stack.sh.log.out
+    register: stack_result
+    ignore_errors: true
+
+  - name: Fetch stack.sh.log.out
+    fetch: src=/tmp/stack.sh.log.out dest={{ result_dir }}/stack.sh.log.out flat=yes validate_md5=no
+
+  - name: Fail the stack.sh task
+    fail: msg="Failed to complete stack.sh"
+    when: stack_result|failed
