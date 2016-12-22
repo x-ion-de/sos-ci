@@ -27,7 +27,7 @@ def just_doit(patchset_ref, results_dir):
     vars = "instance_name=%s" % (ref_name)
     vars += " patchset_ref=%s" % patchset_ref
     vars += " results_dir=%s" % results_dir
-    cmd = '/usr/local/bin/ansible-playbook --extra-vars '\
+    cmd = 'ansible-playbook --extra-vars '\
           '\"%s\" %s/run_ci.yml' % (vars, cfg['Ansible']['ansible_dir'])
 
     logger.debug('Running ansible run_ci command: %s', cmd)
@@ -37,7 +37,7 @@ def just_doit(patchset_ref, results_dir):
 
     vars = "ref_name=%s" % (ref_name)
     vars += " results_dir=%s" % results_dir
-    cmd = '/usr/local/bin/ansible-playbook --extra-vars '\
+    cmd = 'ansible-playbook --extra-vars '\
           '\"%s\" %s/publish.yml' % (vars, cfg['Ansible']['ansible_dir'])
     logger.debug('Running ansible publish command: %s', cmd)
 
@@ -71,7 +71,7 @@ def just_doit(patchset_ref, results_dir):
     # run if preceeded by a failure
     vars = "instance_name=%s" % (ref_name)
     vars += " patchset_ref=%s" % patchset_ref
-    cmd = '/usr/local/bin/ansible-playbook --extra-vars '\
+    cmd = 'ansible-playbook --extra-vars '\
           '\"%s\" %s/teardown.yml' % (vars, cfg['Ansible']['ansible_dir'])
 
     logger.debug('Running ansible teardown command: %s', cmd)
