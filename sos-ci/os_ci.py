@@ -281,7 +281,7 @@ if __name__ == '__main__':
     while True:
         events = []
         try:
-            events = GerritEventStream('sfci')
+            events = GerritEventStream(cfg['AccountInfo']['ci_name'])
         except Exception as ex:
             logger.exception('Error connecting to Gerrit: %s', ex)
             time.sleep(60)
