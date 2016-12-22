@@ -3,6 +3,6 @@
 *.swo
 *.pyc
 *.log
-*.conf
+*.yaml
 ./data/*
 ./sos-ci/logs/*
