@@ -80,6 +80,8 @@ in the Dockerfile (if you're building it yourself):
 
 Current Status
 --------------
+Updated Dec 23, 2016
+* Patched to run a Chef CI instead of devstack
 Updated May 27, 2015
 * Added Dockerfile so you can build this as a container if you like
 * Pushed a Docker image to Docker-Hub (jgriffith/sos-ci)
@@ -105,6 +107,15 @@ Still very much a work in progress.  Where it stands as of Aug 25, 17:50 UTC
 * Picks events off of gerrit listener, and puts them in a queue
 * Currently queue processor just launches an instance, sleeps 60 seconds and deletes instance
 * Grabs next event in queue
+
+TODO for Chef CI
+----------------
+
+* Add a search for "Depends-On" entries in the commit message and handle
+  these accordingly. (Idea: Clone code from zuul-merger)
+* Add the option to run tests for multiple repositories. (There is quite a number of cookbook repos).
+* Add the ability to run multiple tests for one event. (Maybe already possible and I didn't look closely enough).
+* Collect the logs directory from the test runs and publish it.
 
 TODO
 -----

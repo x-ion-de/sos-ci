@@ -7,6 +7,7 @@
         project_name: "{{ os_tenant_name }}"
         auth_url: "{{ auth_url }}"
       name: "{{ instance_name }}"
+      network: "{{ private_net_id }}"
       image: "{{ image_id }}"
       flavor: "{{ flavor_id }}"
       key_name: "{{ key_name }}"
@@ -17,7 +18,10 @@
   debug: var=devstack_instance
 
 - name: Add single nic instance to devstack_instances
-  add_host: hostname={{ devstack_instance['openstack']['private_v4'] }} groupname=devstack_instances
+  add_host:
+    hostname: "{{ devstack_instance['openstack']['private_v4'] }}"
+    iname: "{{ devstack_instance['openstack']['name'] }}"
+    groupname: devstack_instances
 
 - name: wait for ssh to be ready single nic
   wait_for:
@@ -25,6 +29,3 @@
     host: "{{ devstack_instance['openstack']['private_v4'] }}"
     timeout: 120
     state: started
-
-- name: pause for 30 seconds
-  pause: seconds=30
