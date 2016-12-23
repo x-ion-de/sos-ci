@@ -1,8 +1,0 @@
-os_login: admin
-os_password: solidfire
-os_tenant_name: demo
-auth_url: http://172.16.140.244:5000/v2.0
-image_id: 00d3bc58-db41-4c3e-af15-3e56aea85b73
-flavor_id: 101
-key_name: jdg
-multinic: false
