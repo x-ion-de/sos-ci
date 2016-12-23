@@ -1,12 +1,12 @@
 sos-ci - Simple OpenStack Continuous Integration
 ================================================
 
-This is a somewhat simple app to let you implement a third-pary CI
+This is a somewhat simple app to let you implement a third-party CI
 setup for OpenStack in your own lab.  
 
 The great thing is there's a number of folks using this now, and some
 have even contributed back.  The BAD thing is that there are a number
-of people that are running this now and apprantly know just next to
+of people that are running this now and apparently know just next to
 nothing about OpenStack.
 
 Please, make sure you understand how tools like devstack and logging
@@ -31,7 +31,7 @@ Current requirements and assumptions.
 
 - You have to have an OpenStack Third Party CI account to monitor the Gerrit Stream
 - All of this work thus far assumes running on an OpenStack Cloud
-- Update/Modify sos_ci/ansible/vars.yml for your OpenStack creds
+- Update/Modify sos-ci/ansible/vars.yml for your OpenStack creds
 - If you want to do multi-nic (ie: seperate network for iSCSI, use multi-nic options)
 - In order to use the mail notification option, install:
   * postfix
@@ -76,7 +76,7 @@ in the Dockerfile (if you're building it yourself):
 * Set up your OpenStack creds file
 * Source the creds file in your .bash_profile
 * Configure the settings in sos-ci.conf
-* Make sure you setup the default /etc/ansbile/hosts and ansible.cfg files
+* Make sure you setup the default /etc/ansible/hosts and ansible.cfg files
 
 Current Status
 --------------
