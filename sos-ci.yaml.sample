@@ -1,8 +1,9 @@
 AccountInfo:
-    gerrit_ssh_key: "/pat/to/my/ssh-key"
+    gerrit_ssh_key: "/path/to/my/ssh-key"
     gerrit_host: "review.openstack.org"
     gerrit_port: "29418"
-    project_name: "openstack/cinder"
+    project_names: 
+      - "openstack/cinder"
     ci_name: "SolidFire-dsvm-full"
     ci_account: "sfci"
     recheck_string: "run solidfire"

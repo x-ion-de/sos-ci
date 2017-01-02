@@ -40,7 +40,7 @@ class InstanceBuildException(Exception):
 def _is_my_ci_recheck(event):
     if (event.get('type', 'nill') == 'comment-added' and
             cfg['AccountInfo']['recheck_string'] in event['comment'] and
-            cfg['AccountInfo']['project_name'] == event['change']['project'] and
+            event['change']['project'] in cfg['AccountInfo']['project_names'] and
             event['change']['branch'] == 'master'):
         logger.info('Detected recheck request for event: %s', event)
         return True
@@ -50,7 +50,7 @@ def _is_my_ci_recheck(event):
 def _is_my_ci_master(event):
     if (event.get('type', 'nill') == 'comment-added' and
             'Verified+1' in event['comment'] and
-            cfg['AccountInfo']['project_name'] == event['change']['project'] and
+            event['change']['project'] in cfg['AccountInfo']['project_names'] and
             event['author']['username'] == 'jenkins' and
             event['change']['branch'] == 'master'):
         logger.info('Detected valid event: %s', event)
