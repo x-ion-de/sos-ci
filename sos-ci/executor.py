@@ -18,13 +18,14 @@ this is super straight forward and it works so we'll use it for now.
 """
 
 
-def just_doit(patchset_ref, results_dir):
+def just_doit(patchset_ref, depends_on, results_dir):
     """ Do the dirty work, or let ansible do it. """
 
     ref_name = patchset_ref.replace('/', '-')
     logger = log.setup_logger(results_dir + '/ansible.out')
     logger.debug('Attempting ansible tasks on ref-name: %s', ref_name)
     vars = "instance_name=%s" % (ref_name)
+    vars += " depends_on=%s" % depends_on
     vars += " patchset_ref=%s" % patchset_ref
     vars += " results_dir=%s" % results_dir
     cmd = 'ansible-playbook --extra-vars '\

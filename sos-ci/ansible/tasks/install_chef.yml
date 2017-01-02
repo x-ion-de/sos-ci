@@ -25,6 +25,14 @@
       - libssl-dev
       - zlib1g-dev
 
+  - name: copy clone dependencies script
+    copy:
+      src: /home/ubuntu/sos-ci/sos-ci/ansible/templates/clone_deps.sh
+      dest: /home/ubuntu/clone_deps.sh
+
+  - name: run clone dependencies script
+    shell: depends_on={{ depends_on }} bash -x /home/ubuntu/clone_deps.sh
+
   - name: download chefdk
     get_url:
       url: https://packages.chef.io/stable/ubuntu/12.04/{{ chefdk }}
@@ -34,16 +42,8 @@
     become: yes
     shell: dpkg -i /home/ubuntu/{{ chefdk }}
 
-  - name: clone openstack chef repo
-    git: repo=git://git.openstack.org/openstack/openstack-chef-repo dest=~/openstack-chef-repo
-
-  - name: fetch patchset to check
-    shell: git fetch origin {{ patchset_ref }} && git checkout FETCH_HEAD
-    args:
-      chdir: /home/ubuntu/openstack-chef-repo
-
   - name: run chef client
-    shell: WORKSPACE=/home/ubuntu/logs chef exec rake integration 2>&1 > /tmp/stack.sh.log.out
+    shell: ZUUL_CHANGES=none WORKSPACE=/home/ubuntu/logs chef exec rake integration > /tmp/stack.sh.log.out 2>&1
     args:
       chdir: /home/ubuntu/openstack-chef-repo
     register: stack_result

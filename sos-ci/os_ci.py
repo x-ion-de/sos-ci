@@ -5,7 +5,8 @@ from collections import deque
 import json
 from optparse import OptionParser
 import os
-import paramiko
+import pprint
+import re
 import shutil
 import subprocess
 import sys
@@ -14,6 +15,7 @@ import time
 from yaml import load
 
 import executor
+import gerrit_connection
 import log
 
 fdir = os.path.dirname(os.path.realpath(__file__))
@@ -57,9 +59,58 @@ def _is_my_ci_master(event):
         return True
     return False
 
+# Note(jrosenboom): shamelessly copied from zuul.connection.gerrit
+depends_on_re = re.compile(r"^Depends-On: (I[0-9a-f]{40})\s*$",
+                               re.MULTILINE | re.IGNORECASE)
 
-def _filter_cinder_events(event):
+def _get_depends(event):
+    records = "%(project)s:%(branch)s:%(id)s/%(patchset)s" % {
+               'project': event['change']['project'],
+               'branch': event['change']['branch'],
+               'id': event['change']['number'],
+               'patchset': event['patchSet']['number']}
+    seen = set()
+    with gerrit_connection.conn('query', cfg['AccountInfo'], logger) as conn:
+        for match in depends_on_re.findall(event['change']['commitMessage']):
+            if match in seen:
+                logger.debug("Ignoring duplicate Depends-On: %s" %
+                               (match,))
+                continue
+            seen.add(match)
+            query = "change:%s" % (match,)
+            logger.debug("Updating %s: Running query %s "
+                         "to find needed changes" %
+                         (event['change']['number'], query,))
+            args = '--commit-message --current-patch-set'
+            cmd = 'gerrit query --format json %s %s' % (args, query)
+            try:
+                inp, out, err = conn.exec_command(cmd)
+                lines = out.read().split('\n')
+                data = [json.loads(line) for line in lines
+                        if line.startswith('{')]
+                if data:
+                    logger.debug("Received data from Gerrit query: \n%s" %
+                                 (pprint.pformat(data)))
+                    del data[-1]
+                    for d in data:
+                        ref = "%(project)s:%(branch)s:%(id)s/%(patchset)s^" % {
+                               'project': d['project'],
+                               'branch': d['branch'],
+                               'id': d['number'],
+                               'patchset': d['currentPatchSet']['number']}
+                        logger.debug("Ref: %s" % ref)
+                        records = ref + records
+            except:
+                e = sys.exc_info()[0]
+                logger.error("Error while querying gerrit: %s" % e)
+                raise
+
+    return records
+
+def _filter_ci_events(event):
     if _is_my_ci_recheck(event) or _is_my_ci_master(event):
+        event['dependsOn'] = _get_depends(event)
+
         logger.info('Adding review id %s to job queue...' %
                     event['change']['number'])
 
@@ -119,28 +170,10 @@ class JobThread(Thread):
 
         _send_notification_email(subject, msg)
 
-        logger.debug('Connecting to gerrit for voting '
-                     '%(user)s@%(host)s:%(port)d '
-                     'using keyfile %(key_file)s',
-                     {'user': cfg['AccountInfo']['ci_account'],
-                      'host': cfg['AccountInfo']['gerrit_host'],
-                      'port': int(cfg['AccountInfo']['gerrit_port']),
-                      'key_file': cfg['AccountInfo']['gerrit_ssh_key']})
-
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        try:
-            self.ssh.connect(cfg['AccountInfo']['gerrit_host'],
-                             int(cfg['AccountInfo']['gerrit_port']),
-                             cfg['AccountInfo']['ci_account'],
-                             key_filename=cfg['AccountInfo']['gerrit_ssh_key'])
-        except paramiko.SSHException as e:
-            logger.error('%s', e)
-            sys.exit(1)
+        ssh = gerrit_connection.conn('voting', cfg['AccountInfo'], logger)
 
         logger.info('Issue vote: %s', cmd)
-        self.stdin, self.stdout, self.stderr =\
-            self.ssh.exec_command(cmd)
+        stdin, stdout, stderr = ssh.exec_command(cmd)
 
     def _run_subunit2sql(self, results_dir, ref_name):
         if not cfg['DataBase']['enable_subunit2sql']:
@@ -176,6 +209,7 @@ class JobThread(Thread):
 
                 # Launch instance, run tempest etc etc etc
                 patchset_ref = event['patchSet']['ref']
+                depends_on = event.get('dependsOn')
                 revision = event['patchSet']['revision']
                 logger.debug('Grabbed revision from event: %s', revision)
 
@@ -191,7 +225,7 @@ class JobThread(Thread):
 
                 try:
                     commit_id, success, output = \
-                        executor.just_doit(event['patchSet']['ref'],
+                        executor.just_doit(patchset_ref, depends_on,
                                            results_dir)
                     logger.info('Completed just_doit: %(commit)s, '
                                 '%(success)s, %(output)s',
@@ -220,30 +254,7 @@ class JobThread(Thread):
 
 class GerritEventStream(object):
     def __init__(self, *args, **kwargs):
-
-        logger.debug('Connecting to gerrit stream with '
-                     '%(user)s@%(host)s:%(port)d '
-                     'using keyfile %(key_file)s',
-                     {'user': cfg['AccountInfo']['ci_account'],
-                      'host': cfg['AccountInfo']['gerrit_host'],
-                      'port': int(cfg['AccountInfo']['gerrit_port']),
-                      'key_file': cfg['AccountInfo']['gerrit_ssh_key']})
-
-        self.ssh = paramiko.SSHClient()
-        self.ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-
-        connected = False
-        while not connected:
-            try:
-                self.ssh.connect(cfg['AccountInfo']['gerrit_host'],
-                                 int(cfg['AccountInfo']['gerrit_port']),
-                                 cfg['AccountInfo']['ci_account'],
-                                 key_filename=cfg['AccountInfo']['gerrit_ssh_key'])
-                connected = True
-            except paramiko.SSHException as e:
-                logger.error('%s', e)
-                logger.warn('Gerrit may be down, will pause and retry...')
-                time.sleep(10)
+        self.ssh = gerrit_connection.conn('stream-events', cfg['AccountInfo'], logger)
 
         self.stdin, self.stdout, self.stderr =\
             self.ssh.exec_command("gerrit stream-events")
@@ -297,7 +308,7 @@ if __name__ == '__main__':
             with open(DATA_DIR + '/received-events.log', 'a') as f:
                 json.dump(event, f)
                 f.write('\n')
-            valid_event = _filter_cinder_events(event)
+            valid_event = _filter_ci_events(event)
             if valid_event:
                 logger.debug('Identified valid event, sending to queue...')
                 if not options.event_monitor_only:
