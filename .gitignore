@@ -5,4 +5,5 @@
 *.log
 *.yaml
 ./data/*
+sos-ci/ansible/vars.yml
 ./sos-ci/logs/*
