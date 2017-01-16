@@ -11,6 +11,8 @@
       image: "{{ image_id }}"
       flavor: "{{ flavor_id }}"
       key_name: "{{ key_name }}"
+      # boot_from_volume: yes
+      # terminate_volume: yes
       auto_ip: no
   register: devstack_instance
 
