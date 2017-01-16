@@ -1,19 +1,23 @@
 - hosts: devstack_instances
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+
   tasks:
 
   - name: install pkgs
-    sudo: yes
+    become: true
     apt: pkg={{ item }} state=present
     with_items:
       - git
       - vim
 
   - name: clone devstack
-    sudo: no
+    become: no
     git: repo=https://github.com/openstack-dev/devstack dest=~/devstack
 
   - name: send over local.conf
-    sudo: no
+    become: no
     template: src=../../templates/localconf.base dest=/home/ubuntu/devstack/local.conf
 
   - name: modify cinder_branch
@@ -21,7 +25,7 @@
     register: git_sha
 
   - name: run stack.sh
-    sudo: no
+    become: no
     shell: cd /home/ubuntu/devstack; ./stack.sh 2>&1 > /tmp/stack.sh.log.out
     register: stack_result
     ignore_errors: true

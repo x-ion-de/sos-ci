@@ -2,9 +2,9 @@
   tasks:
 
   - name: send over eth1.cfg
-    sudo: yes
+    become: yes
     template: src=../../templates/eth1.cfg dest=/etc/network/interfaces.d/eth1.cfg
 
   - name: enable eth1
-    sudo: yes
+    become: yes
     shell: ifup eth1

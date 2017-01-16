@@ -2,50 +2,50 @@
   tasks:
 
   - name: send over upload script
-    sudo: no
+    become: no
     template: src=../../scripts/upload_logs.sh dest=/home/ubuntu/
 
   - name: send over subunit2html script
-    sudo: no
+    become: no
     template: src=../../scripts/subunit2html.py dest=/opt/stack/tempest/
 
   - name: Verify permissions on subunit2html
-    sudo: no
+    become: no
     shell: chmod 755 subunit2html.py
     args:
       chdir: /opt/stack/tempest
 
   - name: Generate subunit.log
-    sudo: no
+    become: no
     shell: testr last --subunit > testrepository.subunit
     args:
       chdir: /opt/stack/tempest
 
   - name: Generate results.html
-    sudo: no
+    become: no
     shell: ./subunit2html.py testrepository.subunit
     args:
       chdir: /opt/stack/tempest
 
 
   - name: run upload
-    sudo: yes
+    become: yes
     shell: bash ./upload_logs.sh {{ instance_name }}
     args:
       chdir: /home/ubuntu
 
   - name: fetch tempest_results
-    sudo: yes
+    become: yes
     fetch: src=/opt/stack/tempest/console.log.out dest={{ results_dir }}/{{ instance_name }}/console.log.out flat=yes validate_md5=no
 
   - name: fetch testr_results.html
-    sudo: yes
+    become: yes
     fetch: src=/opt/stack/tempest/results.html dest={{ results_dir }}/{{ instance_name }}/testr_results.html flat=yes validate_md5=no
 
   - name: fetch testrepository.subunit
-    sudo: yes
+    become: yes
     fetch: src=/opt/stack/tempest/testrepository.subunit dest={{ results_dir }}/{{ instance_name }}/testrepository.subunit flat=yes validate_md5=no
 
   - name: fetch logs
-    sudo: yes
+    become: yes
     fetch: src=/home/ubuntu/{{instance_name}}/{{ instance_name }}.tar.gz dest={{ results_dir }}/ flat=yes validate_md5=no
