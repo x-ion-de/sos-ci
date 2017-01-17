@@ -5,17 +5,17 @@
   - name: Nuke it if it exists
     shell: rm -rf {{ ref_name }}*
     args:
-      chdir: ~/www/x-ion-chef-ci-logs
+      chdir: ~/www/ci-logs
 
   - name: Create ref directory on web server
-    shell: mkdir ~/www/x-ion-chef-ci-logs/{{ ref_name }}
+    shell: mkdir ~/www/ci-logs/{{ ref_name }}
 
   - name: Copy backup of console file
-    copy: src={{ results_dir }}/console.log.out dest=~/www/x-ion-chef-ci-logs/{{ ref_name }}/console.log.out
+    copy: src={{ results_dir }}/console.log.out dest=~/www/ci-logs/{{ ref_name }}/console.log.out
     ignore_errors: yes
 
   - name: Copy files to web server
-    copy: src={{ results_dir }}/{{ item }} dest=~/www/x-ion-chef-ci-logs/{{ ref_name }}
+    copy: src={{ results_dir }}/{{ item }} dest=~/www/ci-logs/{{ ref_name }}
     ignore_errors: yes
     with_items:
       - ansible.out
@@ -26,5 +26,5 @@
     shell: tar -xzf {{ ref_name }}.tar.gz
     ignore_errors: yes
     args:
-      chdir: ~/www/x-ion-chef-ci-logs/{{ ref_name }}
+      chdir: ~/www/ci-logs/{{ ref_name }}
 
