@@ -26,3 +26,7 @@ for info in "${dependencies[@]}"; do
   popd
 done
 
+# Make sure that we always have openstack-chef-repo
+if [[ ! -d openstack-chef-repo ]]; then
+  git clone $GIT_BASE/openstack/openstack-chef-repo
+fi
