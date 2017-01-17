@@ -5,9 +5,5 @@
   - name: Shut down instance
     os_server:
       state: absent
-      auth:
-        username: "{{ os_login }}"
-        password: "{{ os_password }}"
-        project_name: "{{ os_tenant_name }}"
-        auth_url: "{{ auth_url }}"
+      cloud: "{{ cloud_name }}"
       name: "{{ instance_name }}"
