@@ -1,11 +1,7 @@
 # Creates a new VM and attaches to a network and passes metadata to the instance
 - os_server:
       state: present
-      auth:
-        username: "{{ os_login }}"
-        password: "{{ os_password }}"
-        project_name: "{{ os_tenant_name }}"
-        auth_url: "{{ auth_url }}"
+      cloud: "{{ cloud_name }}"
       name: "{{ instance_name }}"
       network: "{{ private_net_id }}"
       image: "{{ image_id }}"

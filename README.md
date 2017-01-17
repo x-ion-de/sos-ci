@@ -31,7 +31,7 @@ Current requirements and assumptions.
 
 - You have to have an OpenStack Third Party CI account to monitor the Gerrit Stream
 - All of this work thus far assumes running on an OpenStack Cloud
-- Update/Modify sos-ci/ansible/vars.yml for your OpenStack creds
+- Setup /etc/openstack/clouds.yaml with your OpenStack creds
 - If you want to do multi-nic (ie: seperate network for iSCSI, use multi-nic options)
 - In order to use the mail notification option, install:
   * postfix
@@ -69,7 +69,7 @@ Packages installed via apt-get:
 
 Additional setup
 ----------------
-Whether running the Container image or buidling on a VM etc, there's a few things
+Whether running the Container image or building on a VM etc, there's a few things
 you'll need to do.  Note that these things can/should be automated, particularly 
 in the Dockerfile (if you're building it yourself):
 
@@ -111,9 +111,7 @@ Still very much a work in progress.  Where it stands as of Aug 25, 17:50 UTC
 TODO for Chef CI
 ----------------
 
-* Add a search for "Depends-On" entries in the commit message and handle
-  these accordingly. (Idea: Clone code from zuul-merger)
-* Add the option to run tests for multiple repositories. (There is quite a number of cookbook repos).
+* Make the search for "Depends-On" entries in the commit message recursive.
 * Add the ability to run multiple tests for one event. (Maybe already possible and I didn't look closely enough).
 * Collect the logs directory from the test runs and publish it.
 
