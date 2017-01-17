@@ -3,6 +3,7 @@
 *.swo
 *.pyc
 *.log
+*.retry
 *.yaml
 ./data/*
 sos-ci/ansible/vars.yml
