@@ -51,7 +51,7 @@ def just_doit(patchset_ref, depends_on, results_dir):
 
     success = False
     hash_id = None
-    console_log = results_dir + '/' + 'console.log.out'
+    console_log = results_dir + '/' + 'stack.sh.log.out'
     logger.debug('Looking for console log at: %s', console_log)
     if os.path.isfile(console_log):
         logger.debug('Found the console log...')

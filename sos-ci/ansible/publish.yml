@@ -10,10 +10,6 @@
   - name: Create ref directory on web server
     shell: mkdir ~/www/ci-logs/{{ ref_name }}
 
-  - name: Copy backup of console file
-    copy: src={{ results_dir }}/console.log.out dest=~/www/ci-logs/{{ ref_name }}/console.log.out
-    ignore_errors: yes
-
   - name: Copy files to web server
     copy: src={{ results_dir }}/{{ item }} dest=~/www/ci-logs/{{ ref_name }}
     ignore_errors: yes
