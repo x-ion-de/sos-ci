@@ -20,7 +20,6 @@ ref_name = patchset.replace('/', '-')
 results_dir = results_dir + '/' + ref_name
 os.mkdir(results_dir)
 
-(hash_id, success, results) = executor.just_doit(patchset, depends_on, results_dir)
-print "hash_id:%s", hash_id
+(success, results) = executor.just_doit(patchset, depends_on, results_dir)
 print "success:%s", success
 print "result:%s", results

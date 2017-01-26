@@ -50,7 +50,6 @@ def just_doit(patchset_ref, depends_on, results_dir):
     logger.debug('Response from ansible: %s', output)
 
     success = False
-    hash_id = None
     console_log = results_dir + '/' + 'stack.sh.log.out'
     logger.debug('Looking for console log at: %s', console_log)
     if os.path.isfile(console_log):
@@ -58,14 +57,7 @@ def just_doit(patchset_ref, depends_on, results_dir):
         if 'Failed: 0' in open(console_log).read():
             logger.debug('Evaluated run as successful')
             success = True
-
         logger.info('Status from console logs: %s', success)
-        # We grab the abbreviated sha from the first line of the
-        # console.out file
-        with open(console_log) as f:
-            first_line = f.readline()
-        print "Attempting to parse: %s" % first_line
-        hash_id = first_line.split()[1]
 
     # Finally, delete the instance regardless of pass/fail
     # NOTE it's moved out of tasks here otherwise it won't
@@ -79,4 +71,4 @@ def just_doit(patchset_ref, depends_on, results_dir):
     ansible_proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     output += ansible_proc.communicate()[0]
 
-    return (hash_id, success, output)
+    return (success, output)

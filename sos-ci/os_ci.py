@@ -223,8 +223,10 @@ class JobThread(Thread):
                     shutil.rmtree(results_dir)
                 os.mkdir(results_dir)
 
+                commit_id = revision
+
                 try:
-                    commit_id, success, output = \
+                    success, output = \
                         executor.just_doit(patchset_ref, depends_on,
                                            results_dir)
                     logger.info('Completed just_doit: %(commit)s, '
@@ -236,9 +238,6 @@ class JobThread(Thread):
                 except InstanceBuildException:
                     logger.error('Received InstanceBuildException...')
                     pass
-
-                if commit_id is None:
-                    commit_id = revision
 
                 logger.info("Completed %s", cfg['AccountInfo']['ci_name'])
                 url_name = patchset_ref.replace('/', '-')
