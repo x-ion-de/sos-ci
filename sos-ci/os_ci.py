@@ -43,7 +43,7 @@ def _is_my_ci_recheck(event):
     if (event.get('type', 'nill') == 'comment-added' and
             cfg['AccountInfo']['recheck_string'] in event['comment'] and
             event['change']['project'] in cfg['AccountInfo']['project_names'] and
-            event['change']['branch'] == 'master'):
+            event['change']['branch'] in cfg['AccountInfo']['branch_names']):
         logger.info('Detected recheck request for event: %s', event)
         return True
     return False
@@ -54,7 +54,7 @@ def _is_my_ci_master(event):
             'Verified+1' in event['comment'] and
             event['change']['project'] in cfg['AccountInfo']['project_names'] and
             event['author']['username'] == 'jenkins' and
-            event['change']['branch'] == 'master'):
+            event['change']['branch'] in cfg['AccountInfo']['branch_names']):
         logger.info('Detected valid event: %s', event)
         return True
     return False

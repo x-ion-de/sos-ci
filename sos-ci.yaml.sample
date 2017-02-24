@@ -4,6 +4,9 @@ AccountInfo:
     gerrit_port: "29418"
     project_names: 
       - "openstack/cinder"
+    branch_names:
+      - master
+      - "stable/newton"
     ci_name: "SolidFire-dsvm-full"
     ci_account: "sfci"
     recheck_string: "run solidfire"
