@@ -29,4 +29,7 @@ done
 # Make sure that we always have openstack-chef-repo
 if [[ ! -d openstack-chef-repo ]]; then
   git clone $GIT_BASE/openstack/openstack-chef-repo
+  # We need the branch matching our depends_on
+  cd openstack-chef-repo
+  git checkout $branch
 fi
